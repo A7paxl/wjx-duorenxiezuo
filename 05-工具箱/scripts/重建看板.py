@@ -6,11 +6,12 @@ import common
 
 
 def main():
-    paths = [common.BOARD, common.INDEXES / "文件索引.md", common.INDEXES / "关键词索引.md", common.INDEXES / "人物索引.md"]
+    paths = [common.BOARD, *common.INDEX_FILES, *common.OUTER_FILES]
     snap = common.snapshot(paths)
     try:
         common.rebuild_board()
         common.rebuild_indexes()
+        common.publish_outer()
         ok, msg = common.commit_public("重建看板与索引")
         if not ok:
             common.rollback(snap)

@@ -22,12 +22,13 @@ def main():
         return 1
 
     paths = [common.WORKTABLES / f"{a.成员}.md", common.BOARD,
-             common.INDEXES / "文件索引.md", common.INDEXES / "关键词索引.md", common.INDEXES / "人物索引.md"]
+             *common.INDEX_FILES, *common.OUTER_FILES]
     snap = common.snapshot(paths)
     try:
         common.worktable(a.成员, a.个人仓 or None)
         common.rebuild_board()
         common.rebuild_indexes()
+        common.publish_outer()
     except Exception as e:
         common.rollback(snap)
         print(f"收工失败，已回滚：{e}")

@@ -30,7 +30,7 @@ def main():
     old = common.HISTORY / f"{Path(name).stem}_{common.today()}{Path(name).suffix}" if current.exists() else None
 
     paths = [current, old, common.LEDGER, common.NOTICE, common.BOARD,
-             common.INDEXES / "文件索引.md", common.INDEXES / "关键词索引.md", common.INDEXES / "人物索引.md"]
+             *common.INDEX_FILES]
     snap = common.snapshot([p for p in paths if p])
 
     try:

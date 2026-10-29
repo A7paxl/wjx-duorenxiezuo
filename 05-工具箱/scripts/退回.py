@@ -32,7 +32,7 @@ def main():
     personal = repo / "05-单据" / f"{a.原单}-退回.md" if repo else None
 
     paths = [doc, ptr, common.LEDGER, common.NOTICE, common.BOARD,
-             common.INDEXES / "文件索引.md", common.INDEXES / "关键词索引.md", common.INDEXES / "人物索引.md"]
+             *common.INDEX_FILES]
     if personal:
         paths.append(personal)
     snap = common.snapshot(paths)

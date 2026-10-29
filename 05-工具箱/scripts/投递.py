@@ -35,7 +35,7 @@ def main():
     personal_copy = personal / "05-单据" / f"{doc}.md" if personal else None
 
     paths = [dest, ptr, common.LEDGER, common.NOTICE, common.BOARD,
-             common.INDEXES / "文件索引.md", common.INDEXES / "关键词索引.md", common.INDEXES / "人物索引.md"]
+             *common.INDEX_FILES]
     if personal_copy:
         paths.append(personal_copy)
     snap = common.snapshot(paths)
