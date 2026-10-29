@@ -6,10 +6,24 @@ import common
 
 
 def main():
-    common.rebuild_board()
-    common.rebuild_indexes()
-    print("已重建：02-推进管理/任务看板.md、索引/")
-    return 0
+    paths = [common.BOARD, common.INDEXES / "文件索引.md", common.INDEXES / "关键词索引.md", common.INDEXES / "人物索引.md"]
+    snap = common.snapshot(paths)
+    try:
+        common.rebuild_board()
+        common.rebuild_indexes()
+        ok, msg = common.commit_public("重建看板与索引")
+        if not ok:
+            common.rollback(snap)
+            print(f"重建失败，已回滚：{msg}")
+            return 1
+        print("已重建：02-推进管理/任务看板.md、索引/")
+        if msg:
+            print(msg)
+        return 0
+    except Exception as e:
+        common.rollback(snap)
+        print(f"重建异常，已回滚：{e}")
+        return 1
 
 
 if __name__ == "__main__":
