@@ -44,6 +44,7 @@ def main():
 
     try:
         content = (
+            f"---\n类型: 回执\n单号: {a.原单}\n发起人: {a.frm}\n接收人: {a.to}\n状态: 已回执\n更新: {common.today()}\n---\n\n"
             f"# 回执\n\n"
             f"- 原单：{a.原单}\n"
             f"- 发起人：{row[2]}\n"

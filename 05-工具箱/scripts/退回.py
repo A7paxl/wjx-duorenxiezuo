@@ -39,6 +39,7 @@ def main():
 
     try:
         content = (
+            f"---\n类型: 退回单\n单号: {a.原单}\n发起人: {a.frm}\n接收人: {a.to}\n状态: 已退回\n更新: {common.today()}\n---\n\n"
             f"# 退回单\n\n"
             f"- 原单：{a.原单}\n"
             f"- 退回人：{a.frm}\n"
