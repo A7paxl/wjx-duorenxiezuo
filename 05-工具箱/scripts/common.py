@@ -413,6 +413,32 @@ def inspect():
         if status == "已退回":
             if not (OUTBOX / to / f"{doc}-退回.md").exists():
                 issues.append(f"台账 {doc} 已退回但缺退回单")
+    ledger_ids = {row[0]: row for row in ledger_rows()}
+    for base in [OUTBOX, INBOX]:
+        if not base.is_dir():
+            continue
+        for p in sorted(base.rglob("*.md")):
+            if p.name.endswith(".pointer.md"):
+                continue
+            stem = p.stem
+            original = re.sub(r"-(回执|退回)$", "", stem)
+            if original not in ledger_ids:
+                issues.append(f"{p.relative_to(PUBLIC).as_posix()} 不在台账")
+                continue
+            row = ledger_ids[original]
+            expected = row[3] if stem.endswith(("-回执", "-退回")) else row[2]
+            if p.parent.name != expected:
+                issues.append(f"{p.relative_to(PUBLIC).as_posix()} 放错人；应在 {expected}")
+    for p in sorted(INBOX.rglob("*.pointer.md")):
+        stem = p.stem.replace(".pointer", "")
+        original = re.sub(r"-(回执|退回)$", "", stem)
+        if original not in ledger_ids:
+            issues.append(f"{p.relative_to(PUBLIC).as_posix()} 指向的单据不在台账")
+            continue
+        row = ledger_ids[original]
+        expected = row[2] if stem.endswith(("-回执", "-退回")) else row[3]
+        if p.parent.name != expected:
+            issues.append(f"{p.relative_to(PUBLIC).as_posix()} 指向消息放错人；应在 {expected}")
     pat = re.compile(r"(中签率|配额总量|放量节奏|当期机型)\s*[:：=]?\s*\d")
     for p in PUBLIC.rglob("*.md"):
         if ".git" in p.parts:
