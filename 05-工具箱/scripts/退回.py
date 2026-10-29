@@ -28,7 +28,8 @@ def main():
     doc = common.OUTBOX / a.frm / f"{a.原单}-退回.md"
     rel = doc.relative_to(common.SPACE).as_posix()
     ptr = common.INBOX / a.to / f"{a.原单}-退回.pointer.md"
-    personal = common.copy_to_personal(a.frm, f"{a.原单}-退回.md", "", root=a.个人仓 or None)
+    repo = common.personal_repo(a.frm, a.个人仓 or None)
+    personal = repo / "05-单据" / f"{a.原单}-退回.md" if repo else None
 
     paths = [doc, ptr, common.LEDGER, common.NOTICE, common.BOARD,
              common.INDEXES / "文件索引.md", common.INDEXES / "关键词索引.md", common.INDEXES / "人物索引.md"]
