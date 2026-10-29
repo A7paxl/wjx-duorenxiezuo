@@ -37,7 +37,12 @@ def today():
 
 
 def read(p):
-    return p.read_text(encoding="utf-8") if p.exists() else ""
+    if not p.exists():
+        return ""
+    try:
+        return p.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return ""
 
 
 def write(p, s):
@@ -274,8 +279,11 @@ def effectiveness(rel):
 def public_files():
     files = []
     for p in sorted(PUBLIC.rglob("*")):
-        if p.is_file() and ".git" not in p.parts:
-            files.append(p.relative_to(PUBLIC).as_posix())
+        if not p.is_file() or ".git" in p.parts or "__pycache__" in p.parts:
+            continue
+        if p.name in (".DS_Store", ".gitkeep") or p.suffix in (".pyc",):
+            continue
+        files.append(p.relative_to(PUBLIC).as_posix())
     return files
 
 
