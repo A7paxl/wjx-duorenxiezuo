@@ -25,6 +25,7 @@ python3 "{common.PUBLIC}/05-工具箱/scripts/同步工作台.py" --成员 {a.�
 '''
     public_body = f'''#!/bin/sh
 python3 "{common.PUBLIC}/05-工具箱/scripts/巡检.py" || true
+python3 "{common.PUBLIC}/05-工具箱/scripts/收件通知.py" || true
 python3 "{common.PUBLIC}/05-工具箱/scripts/模拟通知.py" || true
 '''
     if a.演练:

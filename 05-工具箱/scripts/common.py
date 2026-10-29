@@ -50,6 +50,21 @@ def write(p, s):
     p.write_text(s, encoding="utf-8")
 
 
+def front_matter(p):
+    text = read(p)
+    if not text.startswith("---\n"):
+        return {}
+    end = text.find("\n---", 4)
+    if end == -1:
+        return {}
+    data = {}
+    for line in text[4:end].splitlines():
+        if ":" in line:
+            k, v = line.split(":", 1)
+            data[k.strip()] = v.strip()
+    return data
+
+
 def roster_members():
     names = []
     for line in read(ROSTER).splitlines():
@@ -182,6 +197,13 @@ def worktable(member, root=None):
             d.get("更新", today()),
         ))
     lines = [
+        "---",
+        "类型: 工作台",
+        f"成员: {member}",
+        f"更新: {today()}",
+        "生成: 同步工作台.py",
+        "---",
+        "",
         f"# {member} 的工作台",
         "",
         "> 由个人仓任务状态生成；不要手写。",
@@ -216,6 +238,12 @@ def stale(update):
 
 def rebuild_board():
     lines = [
+        "---",
+        "类型: 看板",
+        f"更新: {today()}",
+        "生成: 重建看板.py",
+        "---",
+        "",
         "# 任务看板",
         "",
         "> 由工作台与交换台账重建；自报与证据对不上时标红，工作台过期标注。",
@@ -375,6 +403,49 @@ def publish_outer():
     write(OUTER / "README.md", "# 外圈只读\n\n- 任务看板：`任务看板.html`\n- 结论：`../04-知识区/current/`\n- 决策：`../04-知识区/动态知识/决策记录.md`\n- 人员：`../01-成员与规则/成员名册.md`\n\n外圈只读公共仓，不碰任何个人仓。\n")
 
 
+
+def validate_headers():
+    issues = []
+    for m in members():
+        p = WORKTABLES / f"{m}.md"
+        d = front_matter(p)
+        if d.get("类型") != "工作台":
+            issues.append(f"工作台缺少 YAML 头：{m}")
+        if not d.get("更新"):
+            issues.append(f"工作台 YAML 头缺更新：{m}")
+    d = front_matter(BOARD)
+    if d.get("类型") != "看板":
+        issues.append("任务看板缺少 YAML 头")
+    if not d.get("更新"):
+        issues.append("任务看板 YAML 头缺更新")
+    for m in personal_members():
+        for f in task_status_files(m):
+            d = parse_status(f)
+            for k in ["任务", "状态", "更新"]:
+                if not d.get(k):
+                    issues.append(f"{m}/{f.parent.name}/任务状态.yaml 缺 {k}")
+        base = PERSONAL / m / "00-任务包"
+        if base.is_dir():
+            for pkg in sorted(base.iterdir()):
+                if not pkg.is_dir() or "模板" in pkg.name:
+                    continue
+                for name in ["任务说明.md", "输入清单.md", "待裁决事项.md", "过程记录.md"]:
+                    d = front_matter(pkg / name)
+                    for k in ["类型", "任务", "更新"]:
+                        if not d.get(k):
+                            issues.append(f"{m}/{pkg.name}/{name} 缺 YAML 头字段 {k}")
+    for base in [OUTBOX]:
+        if not base.is_dir():
+            continue
+        for p in sorted(base.rglob("*.md")):
+            if p.name.endswith(".pointer.md"):
+                continue
+            d = front_matter(p)
+            for k in ["类型", "单号", "发起人", "接收人", "状态", "更新"]:
+                if not d.get(k):
+                    issues.append(f"{p.relative_to(PUBLIC).as_posix()} 缺 YAML 头字段 {k}")
+    return issues
+
 def inspect():
     issues = []
     for m in personal_members():
@@ -450,6 +521,7 @@ def inspect():
         for r in worktable_rows(m):
             if stale(r[5]):
                 issues.append(f"{m}/{r[0]} 工作台过期（{r[5]}）")
+    issues.extend(validate_headers())
     return issues
 
 

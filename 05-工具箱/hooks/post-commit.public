@@ -1,0 +1,4 @@
+#!/bin/sh
+python3 "<公共仓路径>/05-工具箱/scripts/巡检.py" || true
+python3 "<公共仓路径>/05-工具箱/scripts/收件通知.py" || true
+python3 "<公共仓路径>/05-工具箱/scripts/模拟通知.py" || true
